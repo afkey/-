@@ -3,14 +3,19 @@
     <div class="header">
       <h1>后台管理系统</h1>
     </div>
-    <el-form ref="form" class="longin-form">
-      <el-form-item>
+    <el-form
+      ref="login-form"
+      class="longin-form"
+      :model="user"
+      :rules="formRules"
+    >
+      <el-form-item prop="mobile">
         <el-input v-model="user.mobile" placeholder="请输入用户名"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="code">
         <el-input v-model="user.code" placeholder="请输入验证码"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="agree">
         <el-checkbox v-model="checked"
           >我已阅读并同意用户协议及隐私条款</el-checkbox
         >
@@ -35,16 +40,46 @@ export default {
   data() {
     return {
       user: {
-        mobile: "",
-        code: "",
+        mobile: "13911111111",
+        code: "246810",
+        agree: false,
       },
-      checked: false,
       onLoading: false,
+      checked: false,
+      //表单验证
+      formRules: {
+        mobile: [
+          { required: true, message: "请输入手机号", trigger: "change" },
+          {
+            pattern: /^1[3|5|7|8|9]\d{9}$/,
+            message: "请输入正确的号码格式",
+            trigger: "change",
+          },
+        ],
+        code: [
+          { required: true, message: "验证码不能为空", trigger: "change" },
+          { pattern: /^\d{6}$/, message: "请输入6位验证码" },
+        ],
+        agree: [
+          {
+            required: true,
+            message: "请阅读并勾选隐私协议",
+            trigger: "change",
+          },
+        ],
+      },
     };
   },
   methods: {
     //发送登录请求
     login() {
+      //手动验证表单
+      this.$refs["login-form"].validate((valid) => {
+        if (!valid) return;
+        this.onLogin();
+      });
+    },
+    onLogin() {
       this.onLoading = true;
       request({
         method: "POST",
@@ -57,6 +92,11 @@ export default {
             message: "恭喜你，这是一条成功消息",
             type: "success",
           });
+          //路由跳转
+          this.$router.push({
+            name:'home'
+          })
+          console.log(this);
           this.onLoading = false;
           console.log(res);
         })
