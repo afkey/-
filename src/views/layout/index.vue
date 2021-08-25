@@ -12,7 +12,7 @@
         <el-dropdown>
           <div class="avater">
             <img :src="user.photo" alt="" />
-            <span>{{user.name}}</span>
+            <span>{{ user.name }}</span>
             <i class="el-icon-arrow-down el-icon--right"></i>
           </div>
           <el-dropdown-menu slot="dropdown">
@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      user: {},
+      user: {},//用户信息
     };
   },
   created() {
@@ -72,14 +72,14 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .avater{
+  .avater {
     display: flex;
     align-items: center;
   }
   span {
     margin: 0 10px;
   }
-  img{
+  img {
     width: 30px;
     height: 30px;
     border-radius: 50%;

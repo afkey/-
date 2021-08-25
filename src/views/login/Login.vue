@@ -88,16 +88,20 @@ export default {
       })
         .then((res) => {
           //登录成功
+          //消息提示
           this.$message({
             message: "恭喜你，这是一条成功消息",
             type: "success",
           });
+          this.onLoading = false;
           //路由跳转
           this.$router.push({
-            name:'home'
-          })
-          console.log(this);
-          this.onLoading = false;
+            name: "home",
+          });
+          //本地保存token
+          let user = res.data.data;
+          window.localStorage.setItem("user", JSON.stringify(user));
+          
           console.log(res);
         })
         .catch((err) => {
