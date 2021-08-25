@@ -4,7 +4,23 @@
       <app-aside></app-aside>
     </el-aside>
     <el-container>
-      <el-header>Header</el-header>
+      <el-header class="header-container">
+        <div>
+          <i class="el-icon-s-fold"></i>
+          <span>XXXXXXXXXXXXXXX公司</span>
+        </div>
+        <el-dropdown>
+          <div class="avater">
+            <img :src="user.photo" alt="" />
+            <span>{{user.name}}</span>
+            <i class="el-icon-arrow-down el-icon--right"></i>
+          </div>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>设置</el-dropdown-item>
+            <el-dropdown-item>退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </el-header>
       <el-main>
         <router-view></router-view>
       </el-main>
@@ -14,15 +30,27 @@
 
 <script>
 import AppAside from "./component/AppAside";
+
+import { getUserProfile } from "@/api/user.js";
 export default {
   name: "Layout",
   components: {
     AppAside,
   },
+  data() {
+    return {
+      user: {},
+    };
+  },
+  created() {
+    getUserProfile().then((res) => {
+      this.user = res.data.data;
+    });
+  },
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .layout-container {
   position: fixed;
   left: 0;
@@ -31,12 +59,30 @@ export default {
   bottom: 0;
 }
 .el-aside {
-  background-color: rgb(142, 218, 218);
+  background-color: #002033;
 }
 .el-header {
-  background-color: rgb(112, 169, 175);
+  background-color: rgb(255, 255, 255);
+  border-bottom: 1px solid #ccc;
 }
 .el-main {
-  background-color: rgb(17, 167, 231);
+  background-color: white;
+}
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .avater{
+    display: flex;
+    align-items: center;
+  }
+  span {
+    margin: 0 10px;
+  }
+  img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
 }
 </style>
