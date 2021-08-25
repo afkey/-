@@ -93,16 +93,12 @@ export default {
             message: "恭喜你，这是一条成功消息",
             type: "success",
           });
-          this.onLoading = false;
-          //路由跳转
-          this.$router.push({
-            name: "home",
-          });
           //本地保存token
           let user = res.data.data;
           window.localStorage.setItem("user", JSON.stringify(user));
-          
-          console.log(res);
+          this.onLoading = false;
+          //路由跳转
+          this.$router.push('/');
         })
         .catch((err) => {
           //登录失败
