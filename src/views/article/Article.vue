@@ -83,7 +83,7 @@
           <el-table-column prop="pubdate" label="发布时间"> </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button size="mini">编辑</el-button>
+              <el-button size="mini" @click="$router.push(`/publish?id=${scope.row.id}`)">编辑</el-button>
               <el-button
                 size="mini"
                 type="danger"
