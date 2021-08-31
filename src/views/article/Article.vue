@@ -121,9 +121,6 @@ export default {
   name: "Article",
   data() {
     return {
-      form: {
-        region: "",
-      },
       dateRange: "",
       articlesList: [],
       articlesStatus: [

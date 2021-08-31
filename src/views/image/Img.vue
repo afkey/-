@@ -1,58 +1,187 @@
 <template>
-  <el-card class="box-card">
-    <div slot="header" class="clearfix">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>素材管理</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <div class="text item">
-      <el-form ref="form" :model="form" label-width="80px">
-        <el-form-item label="标题">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="内容">
-          <el-input type="textarea" v-model="form.desc"></el-input>
-        </el-form-item>
-        <el-form-item label="封面">
-          <el-radio-group v-model="form.resource">
-            <el-radio label="无图"></el-radio>
-            <el-radio label="三图"></el-radio>
-            <el-radio label="三单图图"></el-radio>
-            <el-radio label="自动"></el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="频道">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary">发表</el-button>
-          <el-button>存入草稿</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-  </el-card>
+  <div class="img-container">
+    <el-card class="box-card">
+      <div slot="header" class="clearfix">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>内容管理</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="btn-group">
+        <el-radio-group v-model="collect" @change="loadImage()" size="mini">
+          <el-radio-button :label="false">全部</el-radio-button>
+          <el-radio-button :label="true">收藏</el-radio-button>
+        </el-radio-group>
+        <el-button type="success" size="mini" @click="dialogTableVisible = true"
+          >上传图片</el-button
+        >
+      </div>
+      <el-row :gutter="10">
+        <el-col
+          :xs="12"
+          :sm="6"
+          :md="4"
+          :lg="3"
+          v-for="image in images"
+          :key="image.id"
+          ><div class="grid-content bg-purple set-relative">
+            <el-image
+              style="width: 100px; height: 100px"
+              :src="image.url"
+              fit="cover"
+            ></el-image>
+            <!-- 收藏和删除 -->
+            <div class="butten-group">
+              <el-button
+                type="warning"
+                :icon="
+                  image.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'
+                "
+                circle
+                size="mini"
+                @click="onCollectImage(image)"
+              ></el-button>
+              <el-button
+                type="danger"
+                icon="el-icon-delete"
+                circle
+                size="mini"
+                @click="onDeleteImage(image)"
+              ></el-button>
+            </div>
+            <!-- 收藏和删除 -->
+          </div>
+        </el-col>
+      </el-row>
+      <div class="text item"></div>
+    </el-card>
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      class="pageination"
+      :total="total_count"
+      :page-size="pageSize"
+      :current-page.sync="page"
+      @current-change="onCurrentChange"
+    >
+    </el-pagination>
+
+    <el-dialog
+      title="上传图片"
+      :visible.sync="dialogTableVisible"
+      :append-to-body="true"
+    >
+      <el-upload
+        class="upload-demo"
+        drag
+        action="http://api-toutiao-web.itheima.net/mp/v1_0/user/images"
+        :headers="uploadHeaders"
+        multiple
+        name="image"
+        :on-success="uploadSuccess"
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">
+          只能上传jpg/png文件，且不超过500kb
+        </div>
+      </el-upload>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
+import { getImage, collectImage, deleteCollectImage } from "@/api/img.js";
+const user = JSON.parse(window.localStorage.getItem("user"));
 export default {
   name: "Img",
   data() {
     return {
-      form: {
-        name: "",
-        region: "",
-        date1: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
+      images: [],
+      collect: false,
+      dialogTableVisible: false,
+      uploadHeaders: {
+        Authorization: `Bearer ${user.token}`,
       },
+      total_count: null, //总条目数
+      page: 1,
+      pageSize: 10, //每页数量
     };
   },
+  created() {
+    //初始化素材
+    this.loadImage();
+  },
+  methods: {
+    //获取图片
+    loadImage(page = 1) {
+      getImage({
+        page,
+        per_page: this.pageSize,
+        collect: this.collect,
+      }).then((res) => {
+        console.log(res);
+        this.images = res.data.data.results;
+        this.total_count = res.data.data.total_count;
+      });
+    },
+    //分页更新页面
+    onCurrentChange(page) {
+      this.loadImage(page);
+    },
+    //上传成功
+    uploadSuccess() {
+      // 关闭遮罩层
+      this.dialogTableVisible = false;
+
+      this.loadImage(this.page);
+      this.$message({
+        type: "success",
+        message: "上传成功",
+      });
+    },
+    //收藏图片
+    onCollectImage(image) {
+      console.log(image.is_collected);
+
+      collectImage(!image.is_collected, image.id).then((res) => {
+        image.is_collected = res.data.data.collect;
+        console.log(res);
+      });
+    },
+    onDeleteImage(image){
+      deleteCollectImage(image.id).then(res=>{
+        this.loadImage();
+      })
+    }
+  },
+  computed: {},
 };
 </script>
+
+<style scoped>
+.btn-group {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.pageination {
+  margin-top: 20px;
+}
+.butten-group {
+  background-color: rgba(206, 201, 201, 0.8);
+  position: absolute;
+  height: 30px;
+  width: 85px;
+  top: 67px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-left: 15px;
+  padding-top: 3px;
+}
+
+.set-relative {
+  position: relative;
+}
+</style>
