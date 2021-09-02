@@ -1,65 +1,51 @@
 <template>
-  <div class="img-container">
-    <el-card class="box-card">
-      <div slot="header" class="clearfix">
-        <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item>内容管理</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
-
-      <div class="text item">
-        <div class="btn-group">
-          <el-radio-group v-model="collect" @change="loadImage()" size="mini">
-            <el-radio-button :label="false">全部</el-radio-button>
-            <el-radio-button :label="true">收藏</el-radio-button>
-          </el-radio-group>
-          <el-button
-            type="success"
-            size="mini"
-            @click="dialogTableVisible = true"
-            >上传图片</el-button
-          >
+  <div class="img-list-container">
+    <div class="btn-group">
+      <el-radio-group v-model="collect" @change="loadImage()" size="mini">
+        <el-radio-button :label="false">全部</el-radio-button>
+        <el-radio-button :label="true">收藏</el-radio-button>
+      </el-radio-group>
+      <el-button type="success" size="mini" @click="dialogTableVisible = true"
+        >上传图片</el-button
+      >
+    </div>
+    <el-row :gutter="10">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+        :lg="3"
+        v-for="image in images"
+        :key="image.id"
+        ><div class="grid-content bg-purple set-relative">
+          <el-image
+            style="width: 100px; height: 100px"
+            :src="image.url"
+            fit="cover"
+          ></el-image>
+          <!-- 收藏和删除 -->
+          <div class="butten-group">
+            <el-button
+              type="warning"
+              :icon="
+                image.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'
+              "
+              circle
+              size="mini"
+              @click="onCollectImage(image)"
+            ></el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              circle
+              size="mini"
+              @click="onDeleteImage(image)"
+            ></el-button>
+          </div>
+          <!-- 收藏和删除 -->
         </div>
-        <el-row :gutter="10">
-          <el-col
-            :xs="12"
-            :sm="6"
-            :md="4"
-            :lg="3"
-            v-for="image in images"
-            :key="image.id"
-            ><div class="grid-content bg-purple set-relative">
-              <el-image
-                style="width: 100px; height: 100px"
-                :src="image.url"
-                fit="cover"
-              ></el-image>
-              <!-- 收藏和删除 -->
-              <div class="butten-group">
-                <el-button
-                  type="warning"
-                  :icon="
-                    image.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'
-                  "
-                  circle
-                  size="mini"
-                  @click="onCollectImage(image)"
-                ></el-button>
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  circle
-                  size="mini"
-                  @click="onDeleteImage(image)"
-                ></el-button>
-              </div>
-              <!-- 收藏和删除 -->
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-    </el-card>
+      </el-col>
+    </el-row>
     <el-pagination
       background
       layout="prev, pager, next"
@@ -70,7 +56,7 @@
       @current-change="onCurrentChange"
     >
     </el-pagination>
-
+    <!-- 会话窗口 -->
     <el-dialog
       title="上传图片"
       :visible.sync="dialogTableVisible"
@@ -99,7 +85,7 @@
 import { getImage, collectImage, deleteCollectImage } from "@/api/img.js";
 const user = JSON.parse(window.localStorage.getItem("user"));
 export default {
-  name: "Img",
+  name: "ImgList",
   data() {
     return {
       images: [],
@@ -112,10 +98,6 @@ export default {
       page: 1,
       pageSize: 10, //每页数量
     };
-  },
-  created() {
-    //初始化素材
-    this.loadImage();
   },
   methods: {
     //获取图片
@@ -159,6 +141,11 @@ export default {
         this.loadImage();
       });
     },
+  },
+  computed: {},
+  created() {
+    //初始化素材
+    this.loadImage();
   },
 };
 </script>

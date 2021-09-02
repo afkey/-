@@ -24,7 +24,16 @@ export const collectImage = (collect, imgID) => {
 export const deleteCollectImage = (imgID) => {
     return request({
         method: 'DELETE',
-        url: `/mp/v1_0/user/images/${imgID}`, 
+        url: `/mp/v1_0/user/images/${imgID}`,
+    })
+}
+
+//上传图片素材
+export const uploadImg = (data) => {
+    return request({
+        method: 'POST',
+        url: '/mp/v1_0/user/images',
+        data,
     })
 }
 

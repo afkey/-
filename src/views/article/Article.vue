@@ -11,7 +11,7 @@
       </div>
       <div class="text item">
         <!-- 表单 -->
-        <el-form ref="form" :model="form" label-width="80px">
+        <el-form ref="form"  label-width="80px">
           <el-form-item label="状态">
             <el-radio-group v-model="status">
               <el-radio label="">全部</el-radio>

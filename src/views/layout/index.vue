@@ -30,8 +30,9 @@
 
 <script>
 import AppAside from "./component/AppAside";
-
 import { getUserProfile } from "@/api/user.js";
+import Bus from "@/utils/global-bus";
+
 export default {
   name: "Layout",
   components: {
@@ -41,11 +42,6 @@ export default {
     return {
       user: {}, //用户信息
     };
-  },
-  created() {
-    getUserProfile().then((res) => {
-      this.user = res.data.data;
-    });
   },
   methods: {
     onLogout() {
@@ -69,6 +65,17 @@ export default {
           });
         });
     },
+  },
+  created() {
+    getUserProfile().then((res) => {
+      this.user = res.data.data;
+    });
+    //用户更改头像，更新展示
+    Bus.$on("updateUser", (data) => {
+      console.log(111);
+      this.user.name=data.name;
+      this.user.photo=data.photo;
+    });
   },
 };
 </script>

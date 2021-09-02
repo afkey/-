@@ -24,7 +24,9 @@
                   <el-input type="textarea" v-model="user.email"></el-input>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary">立即创建</el-button>
+                  <el-button type="primary" @click="loadUpdateUserProfile"
+                    >提交</el-button
+                  >
                 </el-form-item>
               </el-form>
             </div></el-col
@@ -49,14 +51,31 @@
       :visible.sync="dialogVisible"
       width="40%"
       append-to-body
+      @opened="onDialogOpened"
     >
-      <img :src="previewImg" alt="" width="150">
+      <div class="previewImg-container">
+        <div class="previewImg">
+          <img :src="previewImg" alt="" width="150" ref="img" />
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="onUploadPhoto">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getUserProfile } from "@/api/setting.js";
+import {
+  getUserProfile,
+  updateUserPhoto,
+  updateUserProfile,
+} from "@/api/setting.js";
+import "cropperjs/dist/cropper.css";
+import Cropper from "cropperjs";
+import Bus from "@/utils/global-bus";
+
 export default {
   name: "Settings",
   data() {
@@ -67,15 +86,16 @@ export default {
         mobile: "",
         intro: "",
         email: "",
+        photo: null,
       },
       dialogVisible: false,
       previewImg: "",
+      cropper: null, //裁切器对象
     };
   },
   methods: {
     loadUserProfile() {
       getUserProfile().then((res) => {
-        console.log(res);
         this.user = res.data.data;
       });
     },
@@ -87,14 +107,56 @@ export default {
       file.value = "";
       this.dialogVisible = true;
     },
+    //初始化裁切器
+    onDialogOpened() {
+      if (this.cropper) {
+        this.cropper = this.cropper.replace(this.previewImg);
+        return;
+      }
+
+      const image = this.$refs.img;
+      this.cropper = new Cropper(image, {
+        aspectRatio: 16 / 9,
+      });
+    },
+    //关闭会话窗口获取图片
+    onUploadPhoto() {
+      this.dialogVisible = false;
+      //获取裁切后的图片
+      this.cropper.getCroppedCanvas().toBlob((file) => {
+        const fd = new FormData();
+        fd.append("photo", file);
+        console.log(fd);
+        //上传图片
+        updateUserPhoto(fd).then((res) => {
+          this.user.photo = res.data.data.photo;
+        });
+      });
+    },
+    //更新用户信息
+    loadUpdateUserProfile() {
+      updateUserProfile({
+        name: this.user.name,
+        intro: this.user.intro,
+        email: this.user.email,
+      }).then((res) => {
+        Bus.$emit("updateUser", this.user);
+      });
+    },
   },
   created() {
     this.loadUserProfile();
   },
 };
 </script>
-<style scoped>
+<style lang="less" scoped>
 .info-container {
   margin-top: 20px;
+}
+.previewImg-container {
+  .previewImg {
+    display: block;
+    max-width: 100%;
+  }
 }
 </style>
